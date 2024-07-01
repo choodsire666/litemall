@@ -18,6 +18,9 @@
 
     <modules>
         <module>litemall-db</module>
+        <module>litemall-core</module>
+        <module>litemall-admin-api</module>
+        <module>litemall-all</module>
     </modules>
 
     <properties>
@@ -30,10 +33,35 @@
         <shiro.version>1.6.0</shiro.version>
         <mysql.version>8.0.28</mysql.version>
         <druid.version>1.2.1</druid.version>
+        <spring-boot.version>2.1.5.RELEASE</spring-boot.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.choodsire666</groupId>
+                <artifactId>litemall-db</artifactId>
+                <version>1.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.choodsire666</groupId>
+                <artifactId>litemall-core</artifactId>
+                <version>1.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.choodsire666</groupId>
+                <artifactId>litemall-admin-api</artifactId>
+                <version>1.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.choodsire666</groupId>
+                <artifactId>litemall-all</artifactId>
+                <version>1.0</version>
+            </dependency>
+
             <!--Mybatis-->
             <dependency>
                 <groupId>org.mybatis.spring.boot</groupId>
@@ -73,6 +101,13 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid-spring-boot-starter</artifactId>
                 <version>${druid.version}</version>
+            </dependency>
+
+            <!--json-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-json</artifactId>
+                <version>${spring-boot.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

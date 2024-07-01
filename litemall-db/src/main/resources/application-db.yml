@@ -1,0 +1,39 @@
+spring:
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://127.0.0.1:3306/litemall?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&verifyServerCertificate=false&useSSL=false
+      username: litemall
+      password: litemall123456
+      # 连接池初始化时的连接数
+      initial-size: 10
+      # 连接池中允许的最大活动连接数
+      max-active: 50
+      # 连接池中允许的最小空闲连接数
+      min-idle: 10
+      # 等待连接池分配连接的最大时间
+      max-wait: 60000
+      # 是否启用预编译 SQL 语句的池化
+      pool-prepared-statements: true
+      # 每个连接池可以分配的最大预编译语句对象数量
+      max-pool-prepared-statement-per-connection-size: 20
+      # 用于验证连接是否有效的 SQL 语句
+      validation-query: SELECT 1 FROM DUAL
+      # 在从连接池获取连接时是否进行验证
+      test-on-borrow: false
+      # 在从连接池获取连接时是否进行验证
+      test-on-return: false
+      # 是否在空闲时验证连接
+      test-while-idle: true
+      # 空闲连接验证的间隔时间
+      time-between-eviction-runs-millis: 60000
+      # 是否启用 Web 监控过滤器
+      webStatFilter:
+        enabled: true
+      # 是否启用统计信息 Servlet
+      statViewServlet:
+        enabled: false
+      #  是否启用统计信息过滤器
+      filter:
+        stat:
+          enabled: false

@@ -4,12 +4,54 @@
 
 <generatorConfiguration>
     <context id="mysqlgenerator" targetRuntime="Mybatis3">
+        
+        <property name="autoDelimitKeywords" value="true"/>
+        <!--字段加上引号，防止关键字冲突-->
+        <property name="beginningDelimiter" value="`"/>
+        <property name="endingDelimiter" value="`"/>
+
+        <!--覆盖生成的XML文件-->
+        <plugin type="org.mybatis.generator.plugins.UnmergeableXmlMappersPlugin"/>
+        <!--生成的实体类添加toString()方法-->
+        <plugin type="org.mybatis.generator.plugins.ToStringPlugin"/>
+        <!--生成equals和hashCode方法-->
+        <plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin"/>
+
+        <!--查询单条数据插件-->
+        <plugin type="com.itfsw.mybatis.generator.plugins.SelectOneByExamplePlugin"/>
+        <!--查询结果选择性返回插件-->
+        <plugin type="com.itfsw.mybatis.generator.plugins.SelectSelectivePlugin"/>
+        <!-- Example Criteria 增强插件 -->
+        <plugin type="com.itfsw.mybatis.generator.plugins.ExampleEnhancedPlugin"/>
+        <!-- 数据Model属性对应Column获取插件 -->
+        <plugin type="com.itfsw.mybatis.generator.plugins.ModelColumnPlugin"/>
+        <!-- 逻辑删除插件 -->
+        <plugin type="com.itfsw.mybatis.generator.plugins.LogicalDeletePlugin">
+            <!-- 这里配置的是全局逻辑删除列和逻辑删除值，当然在table中配置的值会覆盖该全局配置 -->
+            <!-- 逻辑删除列类型只能为数字、字符串或者布尔类型 -->
+            <property name="logicalDeleteColumn" value="deleted"/>
+            <!-- 逻辑删除-已删除值 -->
+            <property name="logicalDeleteValue" value="1"/>
+            <!-- 逻辑删除-未删除值 -->
+            <property name="logicalUnDeleteValue" value="0"/>
+        </plugin>
+
+        <commentGenerator>
+            <property name="suppressAllComments" value="true"/>
+            <property name="suppressDate" value="true"/>
+        </commentGenerator>
+
 
         <!--数据库连接信息-->
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
                         connectionURL="jdbc:mysql://127.0.0.1:3306/litemall?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=UTC&amp;verifyServerCertificate=false&amp;useSSL=false&amp;nullCatalogMeansCurrent=true"
                         userId="litemall"
                         password="litemall123456"/>
+
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false"/>
+            <property name="useJSR310Types" value="true"/>
+        </javaTypeResolver>
 
         <!--实体类-->
         <javaModelGenerator targetPackage="com.choodsire666.litemall.db.domain" targetProject="src/main/java"/>
@@ -19,21 +61,163 @@
         <javaClientGenerator type="XMLMAPPER" targetPackage="com.choodsire666.litemall.db.dao" targetProject="src/main/java"/>
 
         <!--column="id"：指定生成自增主键的列名为"id"。
-            sqlStatement="Mysql"：指定适用于MySQL数据库。
+            sqlStatement="Mysql", MBG会在生成的<insert>元素中生成一条正确的<selectKey>元素
             identity="true"：表示使用数据库自增方式生成主键。
             type="JDBC"：表示使用JDBC提供的API来获取生成的自增主键值。-->
-        <table tableName="litemall_ad">
-            <generatedKey column="id" sqlStatement="Mysql" identity="true" type="JDBC"/>
+        <table tableName="litemall_ad" domainObjectName="Ad">
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
         </table>
 
-        <table tableName="litemall_address">
-            <generatedKey column="id" sqlStatement="Mysql" identity="true" type="JDBC"/>
+        <table tableName="litemall_address" domainObjectName="Address">
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
         </table>
 
-        <table tableName="litemall_admin">
-            <generatedKey column="id" sqlStatement="Mysql" identity="true" type="JDBC"/>
+        <table tableName="litemall_admin" domainObjectName="Admin">
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
             <columnOverride column="role_ids" javaType="java.lang.Integer[]"
-                            typeHandler=""/>
+                            typeHandler="com.choodsire666.litemall.db.mybatis.JsonStringArrayTypeHandler"/>
+        </table>
+
+        <table tableName="litemall_brand" domainObjectName="Brand">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_cart" domainObjectName="Cart">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+            <columnOverride column="specifications" javaType="java.lang.String[]"
+                            typeHandler="com.choodsire666.litemall.db.mybatis.JsonStringArrayTypeHandler"/>
+        </table>
+
+        <table tableName="litemall_category" domainObjectName="Category">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_collect" domainObjectName="Collect">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_comment" domainObjectName="Comment">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+            <columnOverride column="pic_urls" javaType="java.lang.String[]"
+                            typeHandler="com.choodsire666.litemall.db.mybatis.JsonStringArrayTypeHandler"/>
+        </table>
+
+        <table tableName="litemall_feedback" domainObjectName="Feedback">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+            <columnOverride column="pic_urls" javaType="java.lang.String[]"
+                            typeHandler="com.choodsire666.litemall.db.mybatis.JsonStringArrayTypeHandler"/>
+        </table>
+
+        <table tableName="litemall_footprint" domainObjectName="Footprint">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_goods" domainObjectName="Goods">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+            <columnOverride column="gallery" javaType="java.lang.String[]"
+                            typeHandler="com.choodsire666.litemall.db.mybatis.JsonStringArrayTypeHandler"/>
+        </table>
+
+        <table tableName="litemall_goods_attribute" domainObjectName="Attribute">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_goods_specification" domainObjectName="Specification">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_goods_product" domainObjectName="Product">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+            <columnOverride column="specifications" javaType="java.lang.String[]"
+                            typeHandler="com.choodsire666.litemall.db.mybatis.JsonStringArrayTypeHandler"/>
+        </table>
+
+        <table tableName="litemall_issue" domainObjectName="Issue">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_keyword" domainObjectName="Keyword">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_order" domainObjectName="Order">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_order_goods" domainObjectName="OrderGoods">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+            <columnOverride column="specifications" javaType="java.lang.String[]"
+                            typeHandler="com.choodsire666.litemall.db.mybatis.JsonStringArrayTypeHandler"/>
+        </table>
+
+        <table tableName="litemall_region" domainObjectName="Region">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_search_history" domainObjectName="SearchHistory">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_storage" domainObjectName="Storage">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_topic" domainObjectName="Topic">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+            <columnOverride column="goods" javaType="java.lang.Integer[]"
+                            typeHandler="com.choodsire666.litemall.db.mybatis.JsonIntegerArrayTypeHandler"/>
+        </table>
+
+        <table tableName="litemall_user" domainObjectName="User">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_system" domainObjectName="System">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_groupon_rules" domainObjectName="GrouponRules">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_groupon" domainObjectName="Groupon">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_coupon" domainObjectName="Coupon">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+            <columnOverride column="goods_value" javaType="java.lang.Integer[]"
+                            typeHandler="com.choodsire666.litemall.db.mybatis.JsonIntegerArrayTypeHandler"/>
+        </table>
+
+        <table tableName="litemall_coupon_user" domainObjectName="CouponUser">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_role" domainObjectName="Role">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_permission" domainObjectName="Permission">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_log" domainObjectName="Log">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_notice" domainObjectName="Notice">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_notice_admin" domainObjectName="NoticeAdmin">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table tableName="litemall_aftersale" domainObjectName="AfterSale">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+            <columnOverride column="pictures" javaType="java.lang.String[]"
+                            typeHandler="com.choodsire666.litemall.db.mybatis.JsonStringArrayTypeHandler"/>
         </table>
     </context>
 </generatorConfiguration>
