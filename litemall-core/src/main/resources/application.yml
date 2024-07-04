@@ -1,0 +1,11 @@
+spring:
+  profiles:
+    active: db, core
+  messages:
+    encoding: UTF-8
+logging:
+  level:
+    root: error
+    org.springframework: error
+    org.mybatis: error
+    com.choodsire666.litemall.core: debug

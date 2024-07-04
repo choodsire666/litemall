@@ -1,11 +1,16 @@
 spring:
   profiles:
-    active: db
+    active: db, core, admin
   messages:
     encoding: UTF-8
+server:
+  port: 8083
 logging:
   level:
-    root: ERROR
-    org.springframework: ERROR
-    org.mybatis: ERROR
-    com.choodsire666.litemall.admin: DEBUG
+    root: error
+    org.springframework: error
+    org.mybatis: debug
+    com.choodsire666.litemall.admin: debug
+    com.choodsire666.litemall: error
+knife4j:
+  production: false

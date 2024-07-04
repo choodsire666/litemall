@@ -75,7 +75,7 @@
         <table tableName="litemall_admin" domainObjectName="Admin">
             <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
             <columnOverride column="role_ids" javaType="java.lang.Integer[]"
-                            typeHandler="com.choodsire666.litemall.db.mybatis.JsonStringArrayTypeHandler"/>
+                            typeHandler="com.choodsire666.litemall.db.mybatis.JsonIntegerArrayTypeHandler"/>
         </table>
 
         <table tableName="litemall_brand" domainObjectName="Brand">
