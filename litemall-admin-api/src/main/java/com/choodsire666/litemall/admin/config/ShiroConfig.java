@@ -48,6 +48,7 @@ public class ShiroConfig {
 
         // anon表示匿名， authc表示需要登录后
         filterChainDefinitionMap.put("/admin/auth/login", "anon");
+        filterChainDefinitionMap.put("/admin/auth/kaptcha", "anon");
         filterChainDefinitionMap.put("/admin/auth/401", "anon");
         filterChainDefinitionMap.put("/admin/auth/403", "anon");
         filterChainDefinitionMap.put("/doc.html", "anon");

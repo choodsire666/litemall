@@ -11,6 +11,7 @@ import com.choodsire666.litemall.db.service.AdminService;
 import com.choodsire666.litemall.db.service.PermissionService;
 import com.choodsire666.litemall.db.service.RoleService;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
+import com.google.code.kaptcha.Producer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -27,8 +28,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -55,6 +61,39 @@ public class AuthController {
     @Autowired
     private PermissionService permissionService;
 
+    @Autowired
+    private Producer kaptchaProducer;
+
+    @ApiOperation("获取验证码")
+    @ApiOperationSupport(order = 5)
+    @GetMapping("/kaptcha")
+    public Object kaptcha(HttpServletRequest request) {
+        String code = doKaptcha(request);
+        if (code != null) {
+            return ResponseUtil.ok(code);
+        }
+
+        return ResponseUtil.fail();
+    }
+
+    private String doKaptcha(HttpServletRequest request) {
+        // 生成验证码
+        String code = kaptchaProducer.createText();
+        BufferedImage image = kaptchaProducer.createImage(code);
+
+        // 存储验证码到session中
+        HttpSession session = request.getSession();
+        session.setAttribute("kaptcha", code);
+
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();) {
+            ImageIO.write(image, "jpeg", outputStream);
+            String base64 = Base64.getEncoder().encodeToString(outputStream.toByteArray());
+            return "data:image/jpeg;base64," + base64.replaceAll("\r\n", "");
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
     /**
      * 登录
      *
@@ -69,6 +108,26 @@ public class AuthController {
     public Object login(@RequestBody String body, HttpServletRequest request) {
         String username = JacksonUtil.parseString(body, "username");
         String password = JacksonUtil.parseString(body, "password");
+
+        HttpSession session = request.getSession();
+        String kaptcha = (String) session.getAttribute("kaptcha");
+        String code = JacksonUtil.parseString(body, "code");
+
+        if (!StringUtils.isEmpty(kaptcha)) {
+            // 需要验证码
+            if (StringUtils.isEmpty(code)) {
+                // 但是没提供
+                return ResponseUtil.fail(ADMIN_INVALID_KAPTCHA_REQUIRED, "验证码不能为空");
+            }
+
+            // 验证码不正确
+            if (!kaptcha.equalsIgnoreCase(code)) {
+                return ResponseUtil.fail(ADMIN_INVALID_KAPTCHA, "验证码不正确", doKaptcha(request));
+            }
+        }
+
+
+
         if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
             return ResponseUtil.badArgument();
         }
@@ -81,7 +140,7 @@ public class AuthController {
             currentUser.login(new UsernamePasswordToken(username, password));
         } catch (UnknownAccountException uae) {
             logHelper.logAuthFail("登录", "用户账号或密码不正确");
-            return ResponseUtil.fail(ADMIN_INVALID_ACCOUNT, "用户账号或密码不正确");
+            return ResponseUtil.fail(ADMIN_INVALID_ACCOUNT, "用户账号或密码不正确", doKaptcha(request));
         } catch (LockedAccountException lae) {
             logHelper.logAuthFail("登录", "用户账号已锁定不可用");
             return ResponseUtil.fail(ADMIN_INVALID_ACCOUNT, "用户账号已锁定不可用");
@@ -98,6 +157,7 @@ public class AuthController {
         adminService.updateById(admin);
 
         logHelper.logAuthSucceed("登录");
+        session.removeAttribute("kaptcha");
 
         // 构造返回数据， 包含adminInfo和token
         Map<String, Object> map = new HashMap<>();
