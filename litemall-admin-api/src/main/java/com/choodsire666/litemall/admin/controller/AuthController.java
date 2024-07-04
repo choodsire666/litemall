@@ -1,6 +1,8 @@
 package com.choodsire666.litemall.admin.controller;
 
 import com.choodsire666.litemall.admin.service.LogHelper;
+import com.choodsire666.litemall.admin.util.Permission;
+import com.choodsire666.litemall.admin.util.PermissionUtil;
 import com.choodsire666.litemall.core.util.IpUtil;
 import com.choodsire666.litemall.core.util.JacksonUtil;
 import com.choodsire666.litemall.core.util.ResponseUtil;
@@ -21,16 +23,14 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.choodsire666.litemall.admin.util.AdminResponseCode.*;
 
@@ -156,13 +156,59 @@ public class AuthController {
         return ResponseUtil.ok(data);
     }
 
+    @Autowired
+    private ApplicationContext context;
+
+    /**
+     * 存储所有需要授权的 权限码对应的api请求地址 （缓存），第一次访问时生成。
+     */
+    private HashMap<String, String> systemPermissionMap = null;
+
     /**
      * 转换权限， 加上Api格式
      * @param permissions
      * @return
      */
     private Collection<String> toApi(Set<String> permissions) {
-        // TODO: 完成权限转换
-        return null;
+        if (systemPermissionMap == null) {
+            systemPermissionMap = new HashMap<>();
+            final String basicPackage = "com.choodsire666.litemall.admin";
+            List<Permission> systemPermissions = PermissionUtil.listPermission(context, basicPackage);
+            for (Permission permission : systemPermissions) {
+                String perm = permission.getRequiresPermissions().value()[0];
+                String api = permission.getApi();
+                systemPermissionMap.put(perm, api);
+            }
+        }
+
+        // 过滤出登录用户的拥有的权限apis， * 代表所有需要单独处理
+        Collection<String> apis = new HashSet<>();
+        for (String perm : permissions) {
+            String api = systemPermissionMap.get(perm);
+            apis.add(api);
+
+            if ("*".equals(perm)) {
+                apis.clear();
+                apis.add("*");
+                return apis;
+            }
+        }
+
+        return apis;
+    }
+
+    @RequiresAuthentication
+    @ApiOperation("登出")
+    @ApiOperationSupport(order = 60)
+    @PostMapping("/logout")
+    public Object logout() {
+        // 获取Subject
+        Subject currentUser = SecurityUtils.getSubject();
+
+        // 先记日志，否则后面拿不到登录用户
+        logHelper.logAuthSucceed("登出");
+
+        currentUser.logout();
+        return ResponseUtil.ok();
     }
 }
