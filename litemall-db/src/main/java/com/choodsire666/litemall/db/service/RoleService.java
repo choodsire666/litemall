@@ -41,4 +41,10 @@ public class RoleService {
 
         return roles;
     }
+
+    public List<Role> queryAll() {
+        RoleExample roleExample = new RoleExample();
+        roleExample.or().andDeletedEqualTo(false);
+        return roleMapper.selectByExample(roleExample);
+    }
 }
